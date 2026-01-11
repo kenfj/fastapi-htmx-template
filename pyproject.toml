@@ -1,0 +1,79 @@
+[project]
+name = "fastapi-htmx-template"
+version = "0.1.0"
+description = "Pure Python full-stack FastAPI template with htmx, htmy, and a minimal Todo app."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]>=0.121.1",
+    "htmy[lxml]>=0.9.0",
+    "pydantic-settings>=2.12.0",
+    "redis>=7.1.0",
+    "sqlmodel>=0.0.27",
+    "structlog>=25.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.9.2",
+    "bs4>=0.0.2",
+    "inline-snapshot>=0.31.1",
+    "pip-audit>=2.10.0",
+    "pyright>=1.1.407",
+    "pytest>=9.0.1",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "pytest-timeout>=2.4.0",
+    "pytest-watcher>=0.4.3",
+    "ruff>=0.14.5",
+]
+
+[tool.pyright]
+strict = ["src"]
+typeCheckingMode = "standard"
+
+[tool.pytest.ini_options]
+pythonpath = ["./src", "./tests"]
+addopts = "--cov=src --cov-report=html --cov-fail-under=80 --timeout=10 --maxfail=5"
+filterwarnings = [
+    "ignore::DeprecationWarning:async_lru",
+    "ignore::DeprecationWarning:async_lru",
+    "ignore::DeprecationWarning:htmy.renderer.default",
+]
+
+[tool.coverage.run]
+omit = ["src/core/dependencies.py"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D1",     # All D1xx: Missing docstring in public ...
+    "D203",   # 1 blank line required before class docstring (conflicts with D211)
+    "D211",   # No blank line before class (conflicts with D203)
+    "D212",   # Multi-line docstring summary should start at the first line (conflicts with D213)
+    "D213",   # Multi-line docstring summary should start at the second line (conflicts with D212)
+    "D400",   # First line should end with a period
+    "D415",   # First line should end with a period, question mark, or exclamation point
+    "COM812", # Trailing comma missing (conflicts with formatter)
+    "SIM300", # Yoda condition detected
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "ANN0",    # All ANN0xx: Missing type annotation for ...
+    "ANN201",  # All ANN201xx: Missing return type annotation
+    "ANN202",  # All ANN202xx: Missing type annotation for function argument
+    "S101",    # Use of assert detected
+    "TC0",     # All TC0xx: Test function/class missing docstring
+    "PLR2004", # magic-value-comparison
+]
+"tests/ui/pages/*.py" = [
+    "E501", # Line too long
+]
+"tests/ui/components/*.py" = [
+    "E501", # Line too long
+]
+
+[tool.ruff.format]
+exclude = ["src/core/constants.py"]

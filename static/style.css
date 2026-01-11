@@ -1,0 +1,12 @@
+/* https://htmx.org/reference/#classes */
+.htmx-swapping {
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.todo-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 2fr 40px 60px;
+  align-items: center;
+  gap: 1rem;
+}
