@@ -10,6 +10,7 @@ EXCLUDE_FILES=(
     "src/core/app_env_config.py"
     "src/core/lifespan.py"
     "src/core/logger.py"
+    "src/core/settings.py"
     "src/core/types.py"
     "src/enums/app_env.py"
     "src/enums/log_level.py"

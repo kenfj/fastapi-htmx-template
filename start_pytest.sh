@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export APP_ENV=development
+
 # fix snapshots with:
 # uv run pytest --fix
 

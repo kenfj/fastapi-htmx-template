@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     redis_url: str = Field(default=...)
 
     model_config = SettingsConfigDict(
-        env_prefix="APP_",
+        env_prefix="app_",
         env_file=(
             ".env",
             ".env.local",  # gitignored
