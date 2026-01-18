@@ -86,6 +86,14 @@ open http://127.0.0.1:8000
 open http://127.0.0.1:8000/docs
 ```
 
+```bash
+# enable pre-commit hook
+uv run pre-commit install
+
+# run pre-commit manually
+uv run pre-commit run --all-files
+```
+
 ## Dev Server in Docker Compose
 
 ```bash

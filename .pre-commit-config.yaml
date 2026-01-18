@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: start-check
+        name: Run start_check.sh before commit
+        entry: ./start_check.sh
+        language: script
+        types: [python]
+        always_run: true
