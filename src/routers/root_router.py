@@ -14,4 +14,4 @@ router = APIRouter()
 @router.get("/", response_class=HTMLResponse, response_model=None)
 @html_endpoint
 async def root(ctx: Context) -> Component:
-    return index_html(ctx.db)
+    return await index_html(ctx.db)

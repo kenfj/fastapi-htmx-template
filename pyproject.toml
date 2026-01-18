@@ -6,15 +6,18 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "fastapi[standard]>=0.121.1",
+    "greenlet>=3.3.0",
     "htmy[lxml]>=0.9.0",
+    "psycopg[binary,pool]>=3.3.2",
     "pydantic-settings>=2.12.0",
+    "python-json-logger>=4.0.0",
     "redis>=7.1.0",
-    "sqlmodel>=0.0.27",
-    "structlog>=25.5.0",
+    "sqlmodel>=0.0.31",
 ]
 
 [dependency-groups]
 dev = [
+    "aiosqlite>=0.22.1",
     "bandit>=1.9.2",
     "bs4>=0.0.2",
     "inline-snapshot>=0.31.1",
@@ -35,6 +38,8 @@ typeCheckingMode = "standard"
 
 [tool.pytest.ini_options]
 pythonpath = ["./src", "./tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
 addopts = "--cov=src --cov-report=html --cov-fail-under=80 --timeout=10 --maxfail=5"
 filterwarnings = [
     "ignore::DeprecationWarning:async_lru",

@@ -1,28 +1,37 @@
-from collections.abc import Generator  # noqa: TC003 for FastAPI runtime type resolution
+from collections.abc import (
+    AsyncGenerator,  # noqa: TC003 for FastAPI runtime type resolution
+)
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import Engine
-from sqlmodel import Session, SQLModel, create_engine
+from sqlalchemy import NullPool
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from core.settings import settings
 
+IS_SQLITE = settings.db_url.startswith("sqlite")
 
-def init_db(db_engine: Engine) -> None:
-    """Create all database tables for development/testing purposes."""
-    SQLModel.metadata.create_all(db_engine)
+connect_args = {"check_same_thread": False} if IS_SQLITE else {}
+engine_kwargs = {"poolclass": NullPool} if IS_SQLITE else {}
+
+async_engine = create_async_engine(
+    settings.db_url,
+    echo=settings.db_echo,
+    connect_args=connect_args,
+    **engine_kwargs,
+)
+
+AsyncSessionLocal = async_sessionmaker(
+    bind=async_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
 
 
-def get_engine() -> Engine:
-    return create_engine(settings.db_url)
-
-
-_DbEngine = Annotated[Engine, Depends(get_engine)]
-
-
-def get_db_session(engine: _DbEngine) -> Generator[Session]:
-    with Session(engine) as session:
+async def get_db_session() -> AsyncGenerator[AsyncSession]:
+    async with AsyncSessionLocal() as session:
         yield session
 
 
-DbSession = Annotated[Session, Depends(get_db_session)]
+DbSession = Annotated[AsyncSession, Depends(get_db_session)]

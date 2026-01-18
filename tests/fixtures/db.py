@@ -1,63 +1,45 @@
+import tempfile
+from pathlib import Path
+
 import pytest
-from sqlmodel import Session, create_engine
+from sqlalchemy import NullPool
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlmodel import SQLModel
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from core.providers.db import get_db_session, init_db
-from main import app
 
+@pytest.fixture(scope="session")  # Session scope for engine, function scope for session
+async def engine():
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:  # NOSONAR
+        temp_path = tmp.name
 
-@pytest.fixture
-def test_db_engine():
-    """
-    In-memory DB for repository/service layer tests.
+    test_db_url = f"sqlite+aiosqlite:///{temp_path}"
 
-    Tables are created fresh for each test function and discarded afterwards.
-    """
-    engine = create_engine(
-        "sqlite:///:memory:",
-        echo=False,
-        connect_args={"check_same_thread": False},
+    # Use NullPool for testing to disable pooling
+    async_engine = create_async_engine(
+        test_db_url,
+        connect_args={"check_same_thread": False},  # For SQLite
+        poolclass=NullPool,  # Disable connection pooling for isolation
     )
-    init_db(engine)
-    yield engine
-    engine.dispose()
+    async with async_engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)  # Create tables
+
+    yield async_engine
+
+    await async_engine.dispose()  # Clean up engine
+    if Path(temp_path).exists():
+        Path(temp_path).unlink()
 
 
-@pytest.fixture
-def test_db_session(test_db_engine):
-    """
-    Session for in-memory DB for repository/service layer tests.
+@pytest.fixture  # function scope by default
+async def session(engine):
+    async with engine.connect() as conn, conn.begin() as transaction:
+        async_session_maker = async_sessionmaker(
+            bind=conn, class_=AsyncSession, expire_on_commit=False
+        )
 
-    Used to provide a clean database session for each test function.
-    """
-    with Session(test_db_engine) as session:
-        yield session
+        async with async_session_maker() as async_session:
+            yield async_session
 
-
-@pytest.fixture(autouse=True)
-def override_db_session(tmp_path):
-    """
-    Provide a database session for API (routes) layer tests using a temporary file DB.
-
-    Why file DB?
-    SQLite's in-memory DB cannot be shared across multiple connections.
-    FastAPI's dependency injection creates a new DB session/connection for each request,
-    so in-memory DB would result in isolated, empty databases per request.
-    Using a file-based DB allows all sessions to share the same data,
-    making it suitable for API tests that need persistent test data.
-    """
-    db_path = tmp_path / "test_api.db"
-    engine = create_engine(
-        f"sqlite:///{db_path}",
-        echo=False,
-        connect_args={"check_same_thread": False},
-    )
-    init_db(engine)
-
-    def get_test_session():
-        with Session(engine) as session:
-            yield session
-
-    app.dependency_overrides[get_db_session] = get_test_session
-    yield
-    app.dependency_overrides.clear()
-    engine.dispose()
+        # rollback/cleanup after each test to prevent auto-commit
+        await transaction.rollback()

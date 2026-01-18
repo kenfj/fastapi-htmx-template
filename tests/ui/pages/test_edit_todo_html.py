@@ -1,12 +1,13 @@
+from httpx import AsyncClient
 from inline_snapshot import snapshot
 
 
-def test_edit_todo(client):
+async def test_edit_todo(client: AsyncClient):
     todo = {"title": "Test", "description": "desc", "completed": False}
-    response = client.post("/todos/add", data=todo, follow_redirects=False)
+    response = await client.post("/todos/add", data=todo, follow_redirects=False)
     todo_id = response.headers["X-Created-Todo-ID"]
 
-    response = client.get(f"/todos/{todo_id}/edit")
+    response = await client.get(f"/todos/{todo_id}/edit")
 
     assert response.text == snapshot("""\
 <!DOCTYPE html><html lang="en">

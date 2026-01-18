@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
     from core.types import FieldErrors
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 
 def todo_form_fields(

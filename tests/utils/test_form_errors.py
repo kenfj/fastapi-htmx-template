@@ -1,7 +1,6 @@
 import textwrap
 from io import BytesIO
 
-import pytest
 from fastapi import UploadFile
 from fastapi.datastructures import FormData
 from pydantic_core import ErrorDetails
@@ -60,7 +59,6 @@ def test_to_form_dict_basic():
     }
 
 
-@pytest.mark.asyncio
 async def test_make_error_ul_html():
     errors: FieldErrors = {
         "title": [

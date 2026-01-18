@@ -1,6 +1,5 @@
 import asyncio
 
-import pytest
 from fastapi.responses import HTMLResponse
 from htmy import Component, SafeStr
 from htmy.html import body, head, html, title
@@ -13,7 +12,6 @@ async def dummy_page() -> Component:
     return (SafeStr("<!DOCTYPE html>"), html(head(title("Test")), body("Hello")))
 
 
-@pytest.mark.asyncio
 async def test_html_endpoint_returns_html_response():
     decorated = html_endpoint(dummy_page)
     response = await decorated()

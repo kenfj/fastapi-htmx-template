@@ -1,9 +1,10 @@
 from bs4 import BeautifulSoup
+from httpx import AsyncClient
 from inline_snapshot import snapshot
 
 
-def test_todo_home_empty(client):
-    response = client.get("/")
+async def test_todo_home_empty(client: AsyncClient):
+    response = await client.get("/")
 
     assert response.text == snapshot("""\
 <!DOCTYPE html><html lang="en">
@@ -39,10 +40,10 @@ def test_todo_home_empty(client):
 """)
 
 
-def test_todo_home_with_data(client):
+async def test_todo_home_with_data(client: AsyncClient):
     todo = {"title": "Test", "description": "desc", "completed": False}
-    client.post("/todos/add", data=todo)
-    response = client.get("/")
+    await client.post("/todos/add", data=todo)
+    response = await client.get("/")
     pretty_html = BeautifulSoup(response.text, "html.parser").prettify()
 
     assert pretty_html == snapshot("""\

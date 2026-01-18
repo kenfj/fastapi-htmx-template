@@ -1,8 +1,9 @@
+from httpx import AsyncClient
 from inline_snapshot import snapshot
 
 
-def test_add_todo(client):
-    response = client.get("/todos/add")
+async def test_add_todo(client: AsyncClient):
+    response = await client.get("/todos/add")
 
     assert response.text == snapshot("""\
 <!DOCTYPE html><html lang="en">

@@ -5,6 +5,7 @@
 # List of src files to exclude from test existence check
 EXCLUDE_FILES=(
     "src/core/providers/context.py"
+    "src/core/providers/db.py"
     "src/core/providers/redis.py"
     "src/core/constants.py"
     "src/core/app_env_config.py"
@@ -13,6 +14,7 @@ EXCLUDE_FILES=(
     "src/core/settings.py"
     "src/core/types.py"
     "src/enums/app_env.py"
+    "src/enums/log_format.py"
     "src/enums/log_level.py"
     "src/exceptions/not_found_error.py"
     "src/models/todo_completed_event.py"

@@ -6,7 +6,7 @@ from core.logger import get_logger
 from exceptions import NotFoundError
 from models import ErrorResponse
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 ERROR_LOG_FORMAT = "%s occurred: %s"
 

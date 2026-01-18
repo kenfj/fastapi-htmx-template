@@ -11,11 +11,11 @@ from core.providers.redis import (
 
 if TYPE_CHECKING:
     from redis.asyncio.client import Redis
-    from sqlmodel import Session
+    from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 class AppContext:
-    def __init__(self, db_session: Session, redis_client: Redis) -> None:
+    def __init__(self, db_session: AsyncSession, redis_client: Redis) -> None:
         self.db = db_session
         self.redis = redis_client
 

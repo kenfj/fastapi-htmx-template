@@ -8,7 +8,7 @@ from models import TodoCompletedEvent
 if TYPE_CHECKING:
     from redis.asyncio.client import PubSub, Redis
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 # official example: https://redis.readthedocs.io/en/stable/examples/asyncio_examples.html
 # pyright: reportUnknownMemberType=false

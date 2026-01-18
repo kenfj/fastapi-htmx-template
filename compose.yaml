@@ -1,13 +1,55 @@
 services:
+  app:
+    image: fastapi-htmx-template:latest
+    container_name: app
+    build:
+      context: .
+      target: tester
+    command: uv run fastapi dev --host 0.0.0.0 ./src/main.py
+    environment:
+      - APP_ENV=test
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - ci
+
+  postgres:
+    image: postgres:18.1-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/18/docker
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d app_db"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+
   redis:
-    image: redis:8.4
+    image: redis:8.4-alpine
     container_name: redis
     ports:
       - "6379:6379"
-    restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
-      - redis-data:/data
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
 
 volumes:
-  redis-data:
+  postgres_data:
+  redis_data:

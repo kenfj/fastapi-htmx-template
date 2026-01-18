@@ -1,5 +1,3 @@
-import pytest
-
 from models import TodoCompletedEvent
 from services.todo_pubsub import (
     publish_todo_completed_event,
@@ -7,7 +5,6 @@ from services.todo_pubsub import (
 )
 
 
-@pytest.mark.asyncio
 async def test_pubsub_publish_and_subscribe_mocked(pubsub_mocks):
     redis, pubsub = pubsub_mocks
 

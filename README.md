@@ -13,6 +13,7 @@
 - **Modern, minimal stack**: FastAPI for backend, htmx for dynamic UI, Pico.css for styling, Redis for async features.
 - **No SPA complexity**: Achieve dynamic, interactive UIs without the overhead of React/Vue or client-side JS frameworks.
 - **Production-ready patterns**: Structured logging, async pub/sub, settings management, and testing best practices.
+- **Async DB support**: Fully async connection and ORM support for both PostgreSQL and SQLite (SQLModel/SQLAlchemy async engine).
 - **Easy to extend**: Clean architecture and directory structure for real-world projects and team development.
 
 Ideal for Python developers who want to build modern web apps with minimal dependencies and no JavaScript or template engines.
@@ -55,7 +56,8 @@ This template follows a scalable, real-world project structure. Add your own mod
 - **htmx** (dynamic frontend interactions via HTML attributes; no JS/SPA required)
 - **htmy** (declarative, type-safe HTML builder for Python; no Jinja2, JS, or TS required)
 - **Pico.css** (minimal CSS framework, via CDN)
-- **structlog** (structured logging)
+- **python-json-logger** (structured logging)
+- **SQLModel/SQLAlchemy async engine** (async ORM, async DB connection for PostgreSQL & SQLite)
 - **pytest, pytest-asyncio, pytest-cov, inline-snapshot** (testing)
 - **ruff, pyright, bandit, pip-audit** (lint/type/security/dep check)
 - **uv** (modern Python package/dependency manager)
@@ -66,13 +68,13 @@ This template follows a scalable, real-world project structure. Add your own mod
 # install packages
 uv sync
 
-# start docker services
-docker compose up -d
-docker compose ps
-
 # check codebase
 ./start_check.sh
 ./start_pytest.sh
+
+# start docker services
+docker compose up -d
+docker compose ps
 
 # start development FastAPI server
 ./start_devserver.sh
@@ -82,6 +84,33 @@ open http://127.0.0.1:8000
 
 # FastAPI Swagger docs
 open http://127.0.0.1:8000/docs
+```
+
+## Dev Server in Docker Compose
+
+```bash
+# start fastapi dev server
+docker compose --profile ci up -d
+
+# up with rebuild when updated Dockerfile
+docker compose --profile ci up -d --build
+
+# start postgres and redis only for local development
+docker compose up -d
+
+# check
+docker compose ps
+docker compose logs -f app
+```
+
+* verify final image
+
+```bash
+docker build -t fastapi-htmx-template-prod .
+
+# check
+docker run --rm -p 8000:8000 fastapi-htmx-template-prod
+docker run -it --rm fastapi-htmx-template-prod bash
 ```
 
 ## Upgrade Packages

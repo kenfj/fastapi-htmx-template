@@ -2,11 +2,11 @@ from enum import StrEnum, auto
 
 
 class AppEnv(StrEnum):
-    development = auto()
+    DEVELOPMENT = auto()
     """local development environment"""
-    test = auto()
+    TEST = auto()
     """CI/CD test environment"""
-    staging = auto()
+    STAGING = auto()
     """production-like staging environment"""
-    production = auto()
+    PRODUCTION = auto()
     """production environment"""

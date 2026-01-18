@@ -1,11 +1,9 @@
-import pytest
 from inline_snapshot import snapshot
 
 from ui.components import todo_form_fields
 from utils import render_html
 
 
-@pytest.mark.asyncio
 async def test_todo_form_fields_default():
     html = await render_html(todo_form_fields())
 
@@ -27,7 +25,6 @@ Completed
 """)
 
 
-@pytest.mark.asyncio
 async def test_todo_form_fields_completed():
     form_dict = {
         "title": "foo",

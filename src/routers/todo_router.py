@@ -24,7 +24,7 @@ from ui.pages import add_todo_html, edit_todo_html
 from utils import html_endpoint, htmx_only, render_html
 from utils.form_data import from_form_data
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/todos")
 
@@ -39,7 +39,7 @@ async def show_add_todo_form() -> Component:
 async def create_todo(request: Request, ctx: Context) -> Response:
     form_data = await request.form()
     form_dict = from_form_data(form_data)
-    todo, errors = create_todo_from_form(ctx.db, form_dict)
+    todo, errors = await create_todo_from_form(ctx.db, form_dict)
 
     if todo:
         hdr = {"X-Created-Todo-ID": str(todo.id)}
@@ -54,7 +54,7 @@ async def create_todo(request: Request, ctx: Context) -> Response:
 @router.get("/{todo_id}/edit", response_class=HTMLResponse, response_model=None)
 @html_endpoint
 async def show_edit_todo_form(todo_id: int, session: DbSession) -> Component:
-    form_dict = get_todo_form_dict(session, todo_id)
+    form_dict = await get_todo_form_dict(session, todo_id)
 
     return edit_todo_html(todo_id, form_dict, {})
 
@@ -63,7 +63,7 @@ async def show_edit_todo_form(todo_id: int, session: DbSession) -> Component:
 async def edit_todo(request: Request, ctx: Context, todo_id: int) -> Response:
     form_data = await request.form()
     form_dict = from_form_data(form_data)
-    todo, errors = edit_todo_from_form(ctx.db, todo_id, form_dict)
+    todo, errors = await edit_todo_from_form(ctx.db, todo_id, form_dict)
 
     if todo:
         return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)

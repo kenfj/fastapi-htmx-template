@@ -1,10 +1,19 @@
 import pytest
-from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
+from sqlmodel.ext.asyncio.session import AsyncSession
 
+from core.providers.db import get_db_session
 from main import app
 
 
 @pytest.fixture
-def client():
-    with TestClient(app) as client:
-        yield client
+async def client(session: AsyncSession):
+    app.dependency_overrides[get_db_session] = lambda: session
+
+    # Async TestClient equivalent
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        yield ac
+
+    app.dependency_overrides.clear()

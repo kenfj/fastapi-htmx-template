@@ -6,48 +6,71 @@ Logger setup:
  - Includes filename and line number in log output
 """
 
-from typing import TYPE_CHECKING
+import logging
+import logging.config
 
-import structlog
-
-from core.app_env_config import APP_ENV
 from core.settings import settings
 
-if TYPE_CHECKING:
-    from structlog.stdlib import BoundLogger
-    from structlog.typing import EventDict, Processor
+
+def get_logger(name: str) -> logging.Logger:
+    return logging.getLogger(name)
 
 
-def simple_renderer(_logger: BoundLogger, _method_name: str, events: EventDict) -> str:
-    return (
-        f"{events['timestamp']} [{events['level'].upper()}] "
-        f"{events['filename']}:{events['lineno']} "
-        f"{events['event']}"
+def setup_logging() -> None:
+    formatter = (
+        "pythonjsonlogger.jsonlogger.JsonFormatter"
+        if settings.log_format == "json"
+        else "default"
     )
 
-
-def init_logger() -> None:
-    processors: list[Processor] = [
-        structlog.processors.add_log_level,
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.CallsiteParameterAdder(
-            {
-                structlog.processors.CallsiteParameter.FILENAME,
-                structlog.processors.CallsiteParameter.LINENO,
-            }
-        ),
-    ]
-    if APP_ENV == "production":
-        processors.append(structlog.processors.JSONRenderer())
-    else:
-        processors.append(simple_renderer)
-
-    structlog.configure(
-        processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(settings.log_level.value),
-        cache_logger_on_first_use=True,
-    )
-
-
-def get_logger() -> BoundLogger:
-    return structlog.get_logger()
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "default": {
+                "format": "%(asctime)s %(name)s [%(levelname)s] %(filename)s:%(lineno)d %(message)s",  # noqa: E501
+            },
+            "pythonjsonlogger.jsonlogger.JsonFormatter": {
+                "format": "%(asctime)s %(name)s %(levelname)s %(filename)s %(lineno)d %(message)s",  # noqa: E501
+                "class": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            },
+        },
+        "handlers": {
+            "console": {
+                "formatter": formatter,
+                "class": "logging.StreamHandler",
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": settings.log_level,
+        },
+        "loggers": {
+            "uvicorn": {
+                "handlers": ["console"],
+                "level": settings.log_level,
+                "propagate": False,
+            },
+            "uvicorn.access": {
+                "handlers": ["console"],
+                "level": settings.log_level,
+                "propagate": False,
+            },
+            "uvicorn.error": {
+                "handlers": ["console"],
+                "level": settings.log_level,
+                "propagate": False,
+            },
+            "sqlalchemy.engine": {
+                "handlers": ["console"],
+                "level": settings.log_level,
+                "propagate": False,
+            },
+            "app": {
+                "handlers": ["console"],
+                "level": settings.log_level,
+                "propagate": False,
+            },
+        },
+    }
+    logging.config.dictConfig(logging_config)

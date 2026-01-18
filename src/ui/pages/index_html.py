@@ -7,13 +7,13 @@ from ui.components import app_layout, todo_checkbox
 
 if TYPE_CHECKING:
     from htmy import Component
-    from sqlmodel import Session
+    from sqlmodel.ext.asyncio.session import AsyncSession
 
 
-def index_html(session: Session) -> Component:
-    todos = find_all_todos(session)
-    total = count_todos(session)
-    done = count_completed_todos(session)
+async def index_html(session: AsyncSession) -> Component:
+    todos = await find_all_todos(session)
+    total = await count_todos(session)
+    done = await count_completed_todos(session)
 
     if todos:
         todo_list = ul(

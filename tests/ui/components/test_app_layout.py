@@ -1,4 +1,3 @@
-import pytest
 from htmy.html import section
 from inline_snapshot import snapshot
 
@@ -6,7 +5,6 @@ from ui.components import app_layout
 from utils import render_html
 
 
-@pytest.mark.asyncio
 async def test_app_layout_default():
     html = await render_html(app_layout([section("Hello, world!")]))
     assert html == snapshot("""\

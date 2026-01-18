@@ -1,11 +1,9 @@
-import pytest
 from inline_snapshot import snapshot
 
 from ui.components import todo_checkbox
 from utils import render_html
 
 
-@pytest.mark.asyncio
 async def test_todo_checkbox_unchecked():
     html = await render_html(todo_checkbox(1, completed=False))
     assert html == snapshot(
@@ -13,7 +11,6 @@ async def test_todo_checkbox_unchecked():
     )
 
 
-@pytest.mark.asyncio
 async def test_todo_checkbox_checked():
     html = await render_html(todo_checkbox(2, completed=True))
     assert html == snapshot(
