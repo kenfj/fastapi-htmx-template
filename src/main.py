@@ -24,3 +24,8 @@ app.include_router(root_router.router)
 app.include_router(todo_router.router)
 
 register_exception_handlers(app)
+
+
+@app.get("/health")
+def health_check() -> dict[str, str]:
+    return {"status": "ok"}

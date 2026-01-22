@@ -4,8 +4,8 @@ services:
     container_name: app
     build:
       context: .
-      target: tester
-    command: uv run fastapi dev --host 0.0.0.0 ./src/main.py
+      target: runtime
+    command: uv run fastapi run --host 0.0.0.0 ./src/main.py
     environment:
       - APP_ENV=test
       - PYTHONUNBUFFERED=1
@@ -16,8 +16,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    profiles:
-      - ci
 
   postgres:
     image: postgres:18.1-alpine
@@ -25,16 +23,33 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: user
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: app_db
     volumes:
       - postgres_data:/var/lib/postgresql/18/docker
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d app_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app_db"]
       interval: 3s
       timeout: 2s
       retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:9.11
+    container_name: pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: secret
+      # Don't require the user to login
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      # Don't require a "master" password after logging in
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 
   redis:
     image: redis:8.4-alpine
@@ -50,6 +65,15 @@ services:
       timeout: 2s
       retries: 5
 
+  redisinsight:
+    image: redislabs/redisinsight:3.0.2
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+
 volumes:
   postgres_data:
+  pgadmin_data:
   redis_data:

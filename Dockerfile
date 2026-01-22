@@ -1,48 +1,50 @@
-## syntax=docker/dockerfile:1.4
+## syntax=docker/dockerfile:1
 
-FROM ghcr.io/astral-sh/uv:0.9.24 AS uv_bin
+ARG PYTHON_VERSION=3.14
+ARG UV_VERSION=0.9.24
 
-## ===== builder stage: production dependencies only =====
-FROM python:3.14-slim AS builder
-COPY --from=uv_bin /uv /uvx /bin/
+FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv_bin
+
+FROM python:${PYTHON_VERSION}-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
+# setup uv
+COPY --from=uv_bin /uv /uvx /bin/
+ENV UV_PROJECT_ENVIRONMENT="/app/.venv"
 # https://docs.astral.sh/uv/guides/integration/docker/#optimizations
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 
+
+## ===== builder stage: production dependencies only =====
+FROM base AS builder
+
+COPY pyproject.toml uv.lock ./
+
 RUN --mount=type=cache,target=/root/.cache/uv \
-	--mount=type=bind,source=uv.lock,target=uv.lock \
-	--mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-	uv sync --locked --no-install-project
+	uv sync --frozen --no-install-project --no-dev
 
 
 ## ===== tester stage: dev dependencies + tests =====
-FROM python:3.14-slim AS tester
-COPY --from=uv_bin /uv /uvx /bin/
+FROM builder AS tester
 
 RUN apt-get update && apt-get install -y libatomic1 && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+	uv sync --frozen
 
 COPY . .
 
 ENV APP_ENV=test
-ENV UV_COMPILE_BYTECODE=1
-ENV UV_LINK_MODE=copy
-
-RUN --mount=type=cache,target=/root/.cache/uv \
-	uv sync --locked
-
 RUN ./start_check.sh && uv run pytest --maxfail=1 --disable-warnings -q
 
 
 ## ===== prod stage: production dependencies + app code only =====
-FROM python:3.14-slim AS runtime
-COPY --from=uv_bin /uv /uvx /bin/
-
-WORKDIR /app
+FROM base AS runtime
 
 ## Copy entire venv from builder for full activation
 COPY --from=builder /app/.venv /app/.venv
@@ -58,4 +60,4 @@ ENV PYTHONPATH=src
 ENV VIRTUAL_ENV=/app/.venv
 
 EXPOSE 8000
-CMD ["fastapi", "run", "./src/main.py"]
+CMD ["fastapi", "run", "--host", "0.0.0.0", "main:app"]

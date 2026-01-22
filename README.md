@@ -65,60 +65,65 @@ This template follows a scalable, real-world project structure. Add your own mod
 ## Quick Start
 
 ```bash
-# install packages
-uv sync
-
-# check codebase
-./start_check.sh
-./start_pytest.sh
-
-# start docker services
-docker compose up -d
-docker compose ps
-
-# start development FastAPI server
-./start_devserver.sh
-
-# Sample Todo App
-open http://127.0.0.1:8000
-
-# FastAPI Swagger docs
-open http://127.0.0.1:8000/docs
-```
-
-```bash
-# enable pre-commit hook
-uv run pre-commit install
-
-# run pre-commit manually
-uv run pre-commit run --all-files
-```
-
-## Dev Server in Docker Compose
-
-```bash
 # start fastapi dev server
-docker compose --profile ci up -d
-
-# up with rebuild when updated Dockerfile
-docker compose --profile ci up -d --build
-
-# start postgres and redis only for local development
 docker compose up -d
+
+# start with rebuild after updated code or Dockerfile
+docker compose up -d --build
 
 # check
 docker compose ps
 docker compose logs -f app
 ```
 
-* verify final image
+* Sample Todo App
+    * http://127.0.0.1:8000
+* FastAPI Swagger docs
+    * http://127.0.0.1:8000/docs
+* pgAdmin
+    * http://127.0.0.1:5050/
+    * postgresql://postgres:password@postgres:5432/app_db
+* RedisInsight
+    * http://127.0.0.1:5540/
+    * redis://default@redis:6379
+
+## Local Development
+
+* start `fastapi dev` on terminal and start database with docker compose
+* note: local development backend server will use 127.0.0.0 for database
 
 ```bash
-docker build -t fastapi-htmx-template-prod .
+# install packages
+uv sync
 
-# check
-docker run --rm -p 8000:8000 fastapi-htmx-template-prod
-docker run -it --rm fastapi-htmx-template-prod bash
+# check codebase
+./start_check.sh
+./start_pytest.sh
+# note: pytest use sqlite in-memory database
+
+docker compose up -d postgres redis pgadmin redisinsight
+
+# start development FastAPI server
+./start_devserver.sh
+```
+
+```bash
+# enable pre-commit hook (first time only)
+uv run pre-commit install
+
+# run pre-commit manually
+uv run pre-commit run --all-files
+```
+
+* docker build and run manually
+
+```bash
+# start postgres and redis only for local development
+docker compose up -d postgres redis
+
+docker build -t fastapi-htmx-template .
+docker run --rm -p 8000:8000 fastapi-htmx-template
+docker run -it --rm fastapi-htmx-template bash
 ```
 
 ## Upgrade Packages
