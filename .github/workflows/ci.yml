@@ -7,6 +7,7 @@ on:
 
 jobs:
   test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -21,9 +22,27 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --locked --all-extras --dev
+
+      - name: Restore Playwright browser cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-
+
+      # https://playwright.dev/python/docs/ci
+      - name: Install Playwright browsers
+        run: uv run playwright install --with-deps chromium
       - name: Run start_check.sh
         run: ./start_check.sh
       - name: Run pytest
         run: uv run pytest
         env:
           APP_ENV: test
+      - name: Start services with Docker Compose
+        run: docker compose up -d app postgres redis
+      - name: Run Playwright tests
+        run: uv run pytest tests/e2e --no-cov --tracing=retain-on-failure
+        env:
+          APP_ENV: development

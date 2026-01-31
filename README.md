@@ -36,6 +36,8 @@ Ideal for Python developers who want to build modern web apps with minimal depen
 │   ├── enums/                 # Enum definitions
 │   └── exceptions/            # Custom exceptions
 ├── tests/                     # Test code (mirrors src/ structure)
+│   ├── e2e/                   # Playwright E2E tests (features, fixtures, test_xxx.py)
+│   └── unit/                  # Unit/integration tests
 ├── static/                    # Static files (JS, CSS)
 ├── data/                      # Data files (e.g. SQLite DB)
 ├── scripts/                   # Utility scripts
@@ -59,6 +61,7 @@ This template follows a scalable, real-world project structure. Add your own mod
 - **python-json-logger** (structured logging)
 - **SQLModel/SQLAlchemy async engine** (async ORM, async DB connection for PostgreSQL & SQLite)
 - **pytest, pytest-asyncio, pytest-cov, inline-snapshot** (testing)
+- **Playwright (Python)** (E2E browser testing; tests/e2e/)
 - **ruff, pyright, bandit, pip-audit** (lint/type/security/dep check)
 - **uv** (modern Python package/dependency manager)
 
@@ -103,6 +106,11 @@ uv sync
 
 docker compose up -d postgres redis pgadmin redisinsight
 
+# check DB connection
+psql postgres://postgres:password@127.0.0.1:5432/app_db
+# or
+psql -h 127.0.0.1 -p 5432 -U postgres -d app_db
+
 # start development FastAPI server
 ./start_devserver.sh
 ```
@@ -124,6 +132,23 @@ docker compose up -d postgres redis
 docker build -t fastapi-htmx-template .
 docker run --rm -p 8000:8000 fastapi-htmx-template
 docker run -it --rm fastapi-htmx-template bash
+```
+
+## Playwright E2E tests
+
+```bash
+# install chromium browser (~/Library/Caches/ms-playwright in Mac)
+uv run playwright install --with-deps chromium
+
+# start DB services
+docker compose up -d postgres redis
+
+# run playwright E2E locally
+export APP_ENV=development
+uv run pytest tests/e2e --no-cov
+
+# run playwright E2E in container
+docker build --target e2e-tester .
 ```
 
 ## Upgrade Packages

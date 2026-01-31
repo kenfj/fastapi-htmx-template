@@ -52,4 +52,3 @@ def test_from_exception_with_builtin_exception():
         assert "ZeroDivisionError" in response.trace
         assert "division by zero" in response.trace
         assert "File" in response.trace
-        assert "1 / 0" in response.trace

@@ -39,11 +39,25 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY . .
 
+# unit tests will use sqlite so APP_ENV does not matter here
 ENV APP_ENV=test
 RUN ./start_check.sh && uv run pytest --maxfail=1 --disable-warnings -q
 
 
-## ===== prod stage: production dependencies + app code only =====
+## ===== e2e-tester stage: end-to-end testing dependencies =====
+FROM tester AS e2e-tester
+
+RUN uv run playwright install --with-deps chromium
+
+COPY tests/e2e ./tests/e2e
+
+ENV APP_ENV=test
+ENV APP_DB_URL=postgresql+psycopg://postgres:password@host.docker.internal:5432/app_db
+ENV BASE_URL=http://host.docker.internal:8000
+
+RUN uv run pytest tests/e2e --no-cov
+
+## ===== runtime stage: production dependencies + app code only =====
 FROM base AS runtime
 
 ## Copy entire venv from builder for full activation

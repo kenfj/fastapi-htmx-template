@@ -18,7 +18,7 @@ services:
         condition: service_healthy
 
   postgres:
-    image: postgres:18.1-alpine
+    image: postgres:18-alpine
     container_name: postgres
     ports:
       - "5432:5432"
@@ -52,7 +52,7 @@ services:
       - pgadmin_data:/var/lib/pgadmin
 
   redis:
-    image: redis:8.4-alpine
+    image: redis:8-alpine
     container_name: redis
     ports:
       - "6379:6379"
