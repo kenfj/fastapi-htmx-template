@@ -34,6 +34,20 @@ services:
       timeout: 2s
       retries: 5
 
+  flyway:
+    image: flyway/flyway
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/app_db
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: password
+      FLYWAY_LOCATIONS: filesystem:/flyway/migrations
+    volumes:
+      - ./migrations/sql:/flyway/migrations
+
   pgadmin:
     image: dpage/pgadmin4:9.11
     container_name: pgadmin

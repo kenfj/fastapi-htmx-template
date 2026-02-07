@@ -9,6 +9,9 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      APP_ENV: development
+      PYTHONUNBUFFERED: 1
     services:
       postgres:
         image: postgres:18-alpine
@@ -61,15 +64,20 @@ jobs:
         run: ./start_check.sh
       - name: Run pytest
         run: uv run pytest
-        env:
-          APP_ENV: development
+
+      - name: Flyway migrations
+        run: |
+          docker run --rm --network=host \
+            -v ${{ github.workspace }}/migrations/sql:/flyway/migrations \
+            flyway/flyway \
+            -url=jdbc:postgresql://127.0.0.1:5432/app_db \
+            -user=postgres \
+            -password=password \
+            -locations=filesystem:/flyway/migrations \
+            migrate
       - name: Start FastAPI app
         run: uv run fastapi run --host 0.0.0.0 --port 8000 src/main.py &
-        env:
-          APP_ENV: development
       - name: Wait for the app to be ready
         run: timeout 30s bash -c 'until curl -s http://localhost:8000/docs > /dev/null; do sleep 1; done'
       - name: Run Playwright tests
         run: uv run pytest tests/e2e --no-cov --tracing=retain-on-failure
-        env:
-          APP_ENV: development

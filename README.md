@@ -14,6 +14,7 @@
 - **No SPA complexity**: Achieve dynamic, interactive UIs without the overhead of React/Vue or client-side JS frameworks.
 - **Production-ready patterns**: Structured logging, async pub/sub, settings management, and testing best practices.
 - **Async DB support**: Fully async connection and ORM support for both PostgreSQL and SQLite (SQLModel/SQLAlchemy async engine).
+- **Safe DB migrations with Flyway**: SQL-based migrations are auto-generated with Alembic and applied/managed by Flyway. Enables consistent, reviewable, and production-safe DB schema management.
 - **Easy to extend**: Clean architecture and directory structure for real-world projects and team development.
 
 Ideal for Python developers who want to build modern web apps with minimal dependencies and no JavaScript or template engines.
@@ -132,6 +133,75 @@ docker compose up -d postgres redis
 docker build -t fastapi-htmx-template .
 docker run --rm -p 8000:8000 fastapi-htmx-template
 docker run -it --rm fastapi-htmx-template bash
+```
+
+## DB Migration
+
+* initial setup for alembic_version table
+
+```bash
+uv run alembic init migrations/alembic
+
+uv run alembic revision -m "initial"
+uv run alembic upgrade base:da33bbc9a4c2 --sql  # just for check
+uv run alembic upgrade head
+
+# make sure head in file == current in DB
+
+uv run alembic history  # of py files in versions
+# <base> -> da33bbc9a4c2 (head), initial
+
+uv run alembic current  # of alembic_version in DB
+# da33bbc9a4c2 (head)
+```
+
+* add todo table
+
+```bash
+export PYTHONPATH=src
+
+# add py file
+uv run alembic revision --autogenerate -m "add todo table"
+# migrations/alembic/versions/2026_02_07_1927-d4cb8bc4d8e2_add_todo_table.py
+
+uv run alembic history
+# da33bbc9a4c2 -> d4cb8bc4d8e2 (head), add todo table
+# <base> -> da33bbc9a4c2, initial
+
+uv run alembic current
+# da33bbc9a4c2
+
+uv run alembic upgrade da33bbc9a4c2:head --sql | \
+  grep -v alembic_version \
+  > migrations/sql/V001__2026_02_07_1927-d4cb8bc4d8e2_add_todo_table.sql
+
+# update DB
+uv run alembic upgrade head
+
+uv run alembic current
+# d4cb8bc4d8e2 (head)
+```
+
+* run db migration
+
+```bash
+docker compose run --rm flyway # migrate
+
+# use different variable (password for example)
+docker compose run -e FLYWAY_PASSWORD=actual_password flyway migrate
+# or
+export FLYWAY_PASSWORD=actual_password
+docker compose run -e FLYWAY_PASSWORD flyway migrate
+
+# check
+docker compose run --rm flyway info
+docker compose run --rm flyway validate
+
+# list tables
+psql postgres://postgres:password@127.0.0.1:5432/app_db -c "\dt"
+# or
+export PGPASSWORD=password
+psql -h 127.0.0.1 -p 5432 -U postgres -d app_db -c "\dt"
 ```
 
 ## Playwright E2E tests
