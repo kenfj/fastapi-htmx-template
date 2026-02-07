@@ -60,6 +60,8 @@ RUN uv run pytest tests/e2e --no-cov
 ## ===== runtime stage: production dependencies + app code only =====
 FROM base AS runtime
 
+RUN useradd -m appuser
+
 ## Copy entire venv from builder for full activation
 COPY --from=builder /app/.venv /app/.venv
 
@@ -69,9 +71,13 @@ COPY --from=tester /app/static /app/static
 COPY --from=tester /app/data /app/data
 COPY --from=tester /app/.env* /app/
 
+RUN chown -R appuser:appuser /app
+
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=src
 ENV VIRTUAL_ENV=/app/.venv
+
+USER appuser
 
 EXPOSE 8000
 CMD ["fastapi", "run", "--host", "0.0.0.0", "main:app"]

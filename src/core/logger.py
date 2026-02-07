@@ -11,17 +11,15 @@ import logging.config
 
 from core.settings import settings
 
+JSON_FORMATTER = "pythonjsonlogger.jsonlogger.JsonFormatter"
+
 
 def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
 
 
 def setup_logging() -> None:
-    formatter = (
-        "pythonjsonlogger.jsonlogger.JsonFormatter"
-        if settings.log_format == "json"
-        else "default"
-    )
+    formatter = JSON_FORMATTER if settings.log_format == "json" else "default"
 
     logging_config = {
         "version": 1,
@@ -30,9 +28,9 @@ def setup_logging() -> None:
             "default": {
                 "format": "%(asctime)s %(name)s [%(levelname)s] %(filename)s:%(lineno)d %(message)s",  # noqa: E501
             },
-            "pythonjsonlogger.jsonlogger.JsonFormatter": {
+            JSON_FORMATTER: {
                 "format": "%(asctime)s %(name)s %(levelname)s %(filename)s %(lineno)d %(message)s",  # noqa: E501
-                "class": "pythonjsonlogger.jsonlogger.JsonFormatter",
+                "class": JSON_FORMATTER,
             },
         },
         "handlers": {

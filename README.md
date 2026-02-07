@@ -162,6 +162,22 @@ uv lock --upgrade
 uv sync
 ```
 
+## SonarQube Community Locally
+
+```bash
+docker run -d --rm --name sonarqube -p 9000:9000 sonarqube:community
+```
+
+* http://localhost:9000 (admin/admin)
+* Create a local project > Locally > Generate > Python > Execute the Scanner
+
+```bash
+uvx pysonar \
+  --sonar-host-url=http://localhost:9000 \
+  --sonar-token=<TOKEN> \
+  --sonar-project-key=fastapi-htmx-template
+```
+
 ## Redis Notes
 
 ```bash

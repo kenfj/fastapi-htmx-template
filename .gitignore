@@ -19,6 +19,9 @@ wheels/
 htmlcov/
 .coverage
 
+# SonarQube reports
+.sonar/
+
 # SQLite database files
 data/**
 !data/**/

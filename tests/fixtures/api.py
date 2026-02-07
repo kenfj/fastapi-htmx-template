@@ -12,7 +12,7 @@ async def client(session: AsyncSession):
 
     # Async TestClient equivalent
     async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
+        transport=ASGITransport(app=app), base_url="https://test"
     ) as ac:
         yield ac
 
