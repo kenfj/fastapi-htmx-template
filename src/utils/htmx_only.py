@@ -18,7 +18,7 @@ accepts any arguments and returns an awaitable object
 def htmx_only(func: FuncType) -> FuncType:
     # Copy func's metadata (name, docstring, etc.) to wrapper
     @functools.wraps(func)
-    async def wrapper(*args: tuple[object], **kwargs: dict[str, object]) -> object:
+    async def wrapper(*args: tuple[object, ...], **kwargs: dict[str, object]) -> object:
         request = _get_request_or_raise(args, kwargs)
 
         if request.headers.get("HX-Request") != "true":
@@ -38,7 +38,7 @@ def _get_request_or_raise(
 ) -> Request:
     for arg in args:
         if isinstance(arg, Request):
-            return arg
+            return arg  # type: ignore[return-value]
 
     request = kwargs.get("request") or kwargs.get("_request")
 
@@ -48,4 +48,4 @@ def _get_request_or_raise(
             detail="Request object missing",
         )
 
-    return request
+    return request  # type: ignore[return-value]

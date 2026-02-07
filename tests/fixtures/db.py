@@ -1,7 +1,7 @@
 import tempfile
-from pathlib import Path
 
 import pytest
+from anyio import Path as AsyncPath
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlmodel import SQLModel
@@ -27,8 +27,8 @@ async def engine():
     yield async_engine
 
     await async_engine.dispose()  # Clean up engine
-    if Path(temp_path).exists():
-        Path(temp_path).unlink()
+    if await AsyncPath(temp_path).exists():
+        await AsyncPath(temp_path).unlink()
 
 
 @pytest.fixture  # function scope by default
