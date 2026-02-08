@@ -65,15 +65,18 @@ jobs:
       - name: Run pytest
         run: uv run pytest
 
+      - name: Setup Flyway CLI
+        uses: ./.github/actions/flyway-setup
+        with:
+          flyway-version: '12.0.0'
+
       - name: Flyway migrations
         run: |
-          docker run --rm --network=host \
-            -v ${{ github.workspace }}/migrations/sql:/flyway/migrations \
-            flyway/flyway \
+          tools/flyway-12.0.0/flyway \
             -url=jdbc:postgresql://127.0.0.1:5432/app_db \
             -user=postgres \
             -password=password \
-            -locations=filesystem:/flyway/migrations \
+            -locations=filesystem:./migrations/sql \
             migrate
       - name: Start FastAPI app
         run: uv run fastapi run --host 0.0.0.0 --port 8000 src/main.py &

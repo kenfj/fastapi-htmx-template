@@ -1,0 +1,28 @@
+name: Flyway Setup
+
+description: >
+  Download and cache Flyway CLI for use in CI jobs.
+
+inputs:
+  flyway-version:
+    description: 'Flyway CLI version (e.g. 12.0.0)'
+    required: true
+    default: '12.0.0'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache Flyway CLI
+      id: cache-flyway
+      uses: actions/cache@v5
+      with:
+        path: tools/flyway-${{ inputs.flyway-version }}.tar.gz
+        key: flyway-${{ inputs.flyway-version }}
+
+    - name: Download Flyway CLI
+      if: steps.cache-flyway.outputs.cache-hit != 'true'
+      # https://documentation.red-gate.com/fd/command-line-277579359.html
+      run: |
+        mkdir -p tools
+        wget -qO- https://download.red-gate.com/maven/release/com/redgate/flyway/flyway-commandline/${{ inputs.flyway-version }}/flyway-commandline-${{ inputs.flyway-version }}-linux-x64.tar.gz | tar -xvz -C tools
+      shell: bash
