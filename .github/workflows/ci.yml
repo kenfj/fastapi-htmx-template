@@ -81,7 +81,7 @@ jobs:
             -url=jdbc:postgresql://127.0.0.1:5432/app_db_test \
             -user=app_user \
             -password=app_password \
-            -locations=filesystem:./migrations/sql \
+            -locations=filesystem:./db/migrations/sql \
             migrate
       - name: Start FastAPI app
         run: uv run fastapi run --host 0.0.0.0 --port 8000 src/main.py &

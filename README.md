@@ -141,7 +141,7 @@ docker run -it --rm fastapi-htmx-template bash
 * initial setup for alembic_version table
 
 ```bash
-uv run alembic init migrations/alembic
+uv run alembic init db/migrations/alembic
 
 uv run alembic revision -m "initial"
 uv run alembic upgrade base:da33bbc9a4c2 --sql  # just for check
@@ -163,7 +163,7 @@ export PYTHONPATH=src
 
 # add py file
 uv run alembic revision --autogenerate -m "add todo table"
-# migrations/alembic/versions/2026_02_07_1927-d4cb8bc4d8e2_add_todo_table.py
+# db/migrations/alembic/versions/2026_02_07_1927-d4cb8bc4d8e2_add_todo_table.py
 
 uv run alembic history
 # da33bbc9a4c2 -> d4cb8bc4d8e2 (head), add todo table
@@ -174,7 +174,7 @@ uv run alembic current
 
 uv run alembic upgrade da33bbc9a4c2:head --sql | \
   grep -v alembic_version \
-  > migrations/sql/V001__2026_02_07_1927-d4cb8bc4d8e2_add_todo_table.sql
+  > db/migrations/sql/V001__2026_02_07_1927-d4cb8bc4d8e2_add_todo_table.sql
 
 # update DB
 uv run alembic upgrade head
@@ -183,7 +183,7 @@ uv run alembic current
 # d4cb8bc4d8e2 (head)
 ```
 
-* run db migration
+* run db migration manually
 
 ```bash
 docker compose run --rm flyway # migrate
