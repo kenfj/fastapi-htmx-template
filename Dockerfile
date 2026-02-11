@@ -52,7 +52,7 @@ RUN uv run playwright install --with-deps chromium
 COPY tests/e2e ./tests/e2e
 
 ENV APP_ENV=test
-ENV APP_DB_URL=postgresql+psycopg://postgres:password@host.docker.internal:5432/app_db
+ENV DB_HOST=host.docker.internal
 ENV BASE_URL=http://host.docker.internal:8000
 
 RUN uv run pytest tests/e2e --no-cov

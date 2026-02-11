@@ -16,13 +16,18 @@
         "asyncio",
         "excinfo",
         "fastapi",
+        "healthcheck",
         "htmx",
         "htmy",
+        "jdbc",
         "NOSONAR",
+        "pgadmin",
         "pico",
         "pydantic",
         "pytest",
         "pythonpath",
+        "PYTHONUNBUFFERED",
+        "redisinsight",
         "sqlmodel"
     ]
 }

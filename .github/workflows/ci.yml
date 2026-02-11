@@ -10,7 +10,7 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     env:
-      APP_ENV: development
+      APP_ENV: test
       PYTHONUNBUFFERED: 1
     services:
       postgres:
@@ -18,11 +18,11 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: app_db
+          POSTGRES_USER: app_user
+          POSTGRES_PASSWORD: app_password
+          POSTGRES_DB: app_db_test
         options: >-
-          --health-cmd="pg_isready -U postgres -d app_db"
+          --health-cmd=pg_isready
           --health-interval=3s
           --health-timeout=2s
           --health-retries=5
@@ -65,6 +65,11 @@ jobs:
       - name: Run pytest
         run: uv run pytest
 
+      - name: Init DB schema
+        run: psql -h 127.0.0.1 -U app_user -d app_db_test -f ./db/init/test/init_schema.sql
+        env:
+          PGPASSWORD: app_password
+
       - name: Setup Flyway CLI
         uses: ./.github/actions/flyway-setup
         with:
@@ -73,14 +78,14 @@ jobs:
       - name: Flyway migrations
         run: |
           tools/flyway-12.0.0/flyway \
-            -url=jdbc:postgresql://127.0.0.1:5432/app_db \
-            -user=postgres \
-            -password=password \
+            -url=jdbc:postgresql://127.0.0.1:5432/app_db_test \
+            -user=app_user \
+            -password=app_password \
             -locations=filesystem:./migrations/sql \
             migrate
       - name: Start FastAPI app
         run: uv run fastapi run --host 0.0.0.0 --port 8000 src/main.py &
       - name: Wait for the app to be ready
-        run: timeout 30s bash -c 'until curl -s http://localhost:8000/docs > /dev/null; do sleep 1; done'
+        run: timeout 30s bash -c 'until curl -s http://127.0.0.1:8000/docs > /dev/null; do sleep 1; done'
       - name: Run Playwright tests
         run: uv run pytest tests/e2e --no-cov --tracing=retain-on-failure

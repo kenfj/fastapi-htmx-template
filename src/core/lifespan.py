@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from sqlmodel import SQLModel
 
 from core.providers.db import async_engine
-from core.settings import settings
+from core.settings.app_settings import app_settings
 from enums.app_env import AppEnv
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     # startup code
-    if settings.app_env in (AppEnv.DEVELOPMENT, AppEnv.TEST):
+    if app_settings.app_env in (AppEnv.DEVELOPMENT, AppEnv.TEST):
         async with async_engine.begin() as conn:
             # Create all database tables for development/testing purposes.
             # run_sync calls sync function within async context

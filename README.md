@@ -86,7 +86,7 @@ docker compose logs -f app
     * http://127.0.0.1:8000/docs
 * pgAdmin
     * http://127.0.0.1:5050/
-    * postgresql://postgres:password@postgres:5432/app_db
+    * postgresql://app_user:app_password@postgres:5432/app_db
 * RedisInsight
     * http://127.0.0.1:5540/
     * redis://default@redis:6379
@@ -108,9 +108,10 @@ uv sync
 docker compose up -d postgres redis pgadmin redisinsight
 
 # check DB connection
-psql postgres://postgres:password@127.0.0.1:5432/app_db
+psql postgres://app_user:app_password@127.0.0.1:5432/app_db
 # or
-psql -h 127.0.0.1 -p 5432 -U postgres -d app_db
+export PGPASSWORD=app_password
+psql -h 127.0.0.1 -p 5432 -U app_user -d app_db
 
 # start development FastAPI server
 ./start_devserver.sh
@@ -198,10 +199,10 @@ docker compose run --rm flyway info
 docker compose run --rm flyway validate
 
 # list tables
-psql postgres://postgres:password@127.0.0.1:5432/app_db -c "\dt"
+psql postgres://app_user:app_password@127.0.0.1:5432/app_db -c "\dt"
 # or
 export PGPASSWORD=password
-psql -h 127.0.0.1 -p 5432 -U postgres -d app_db -c "\dt"
+psql -h 127.0.0.1 -p 5432 -U app_user -d app_db -c "\dt"
 ```
 
 ## Playwright E2E tests
@@ -238,12 +239,12 @@ uv sync
 docker run -d --rm --name sonarqube -p 9000:9000 sonarqube:community
 ```
 
-* http://localhost:9000 (admin/admin)
+* http://127.0.0.1:9000 (admin/admin)
 * Create a local project > Locally > Generate > Python > Execute the Scanner
 
 ```bash
 uvx pysonar \
-  --sonar-host-url=http://localhost:9000 \
+  --sonar-host-url=http://127.0.0.1:9000 \
   --sonar-token=<TOKEN> \
   --sonar-project-key=fastapi-htmx-template
 ```

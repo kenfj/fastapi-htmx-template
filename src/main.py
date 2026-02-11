@@ -6,14 +6,14 @@ from fastapi.staticfiles import StaticFiles
 from core.exception_handlers import register_exception_handlers
 from core.lifespan import lifespan
 from core.logger import get_logger, setup_logging
-from core.settings import settings
+from core.settings.app_settings import app_settings
 from routers import root_router, todo_router
 
 setup_logging()
 
 logger = get_logger(__name__)
 
-logger.info("Starting application: %s", settings.app_env)
+logger.info("Starting application: %s", app_settings.app_env)
 
 app = FastAPI(lifespan=lifespan)
 

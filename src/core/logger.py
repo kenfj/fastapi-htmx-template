@@ -9,7 +9,7 @@ Logger setup:
 import logging
 import logging.config
 
-from core.settings import settings
+from core.settings.app_settings import app_settings
 
 JSON_FORMATTER = "pythonjsonlogger.jsonlogger.JsonFormatter"
 
@@ -19,7 +19,8 @@ def get_logger(name: str) -> logging.Logger:
 
 
 def setup_logging() -> None:
-    formatter = JSON_FORMATTER if settings.log_format == "json" else "default"
+    log_level = app_settings.log_level
+    formatter = JSON_FORMATTER if app_settings.log_format == "json" else "default"
 
     logging_config = {
         "version": 1,
@@ -41,32 +42,32 @@ def setup_logging() -> None:
         },
         "root": {
             "handlers": ["console"],
-            "level": settings.log_level,
+            "level": log_level,
         },
         "loggers": {
             "uvicorn": {
                 "handlers": ["console"],
-                "level": settings.log_level,
+                "level": log_level,
                 "propagate": False,
             },
             "uvicorn.access": {
                 "handlers": ["console"],
-                "level": settings.log_level,
+                "level": log_level,
                 "propagate": False,
             },
             "uvicorn.error": {
                 "handlers": ["console"],
-                "level": settings.log_level,
+                "level": log_level,
                 "propagate": False,
             },
             "sqlalchemy.engine": {
                 "handlers": ["console"],
-                "level": settings.log_level,
+                "level": log_level,
                 "propagate": False,
             },
             "app": {
                 "handlers": ["console"],
-                "level": settings.log_level,
+                "level": log_level,
                 "propagate": False,
             },
         },
